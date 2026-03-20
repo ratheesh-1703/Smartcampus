@@ -1,0 +1,64 @@
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\LiveLocation.jsx
+L13:34 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L14:24 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L29:13 'err' is defined but never used. [no-unused-vars]
+L34:3 React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\StudentAttendance.jsx
+L73:18 'err' is defined but never used. [no-unused-vars]
+L136:34 'imageData' is defined but never used. [no-unused-vars]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\StudentList.jsx
+L33:14 'e' is defined but never used. [no-unused-vars]
+L58:14 'error' is defined but never used. [no-unused-vars]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\TeacherAttendance.jsx
+L27:5 Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+  25 |   if(!savedUser){
+  26 |     alert("Session expired. Please login again.");
+> 27 |     window.location.href = "/";
+     |     ^^^^^^^^^^^^^^^ value cannot be modified
+  28 |   }
+  29 |
+  30 |   const user = JSON.parse(savedUser); [react-hooks/immutability]
+L34:5 Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+  32 |   if(user.role !== "teacher" && user.role !== "hod"){
+  33 |     alert("Unauthorized! Only teachers and HODs allowed.");
+> 34 |     window.location.href = "/";
+     |     ^^^^^^^^^^^^^^^ value cannot be modified
+  35 |   }
+  36 |
+  37 |   const teacher_id = [react-hooks/immutability]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\TeacherCourses.jsx
+L18:33 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L19:33 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L21:3 React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\TeacherGrades.jsx
+L7:9 'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u. [no-unused-vars]
+L9:31 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L10:35 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L11:35 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L12:31 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L13:27 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L14:25 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L15:35 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L16:31 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L17:25 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+L52:3 React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. [react-hooks/rules-of-hooks]
+
+C:\Users\ASUS\Downloads\SmartCampus\frontend\src\pages\TeacherMarks.jsx
+L8:9 'teacher_id' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u. [no-unused-vars]
+L18:31 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L19:35 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L20:35 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L21:29 React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+L39:3 React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return? [react-hooks/rules-of-hooks]
+

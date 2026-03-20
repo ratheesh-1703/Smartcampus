@@ -1,0 +1,198 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+
+\begin{document}
+
+\title{SmartCampus: A Role-Aware Web Platform for Integrated Academic Operations, Attendance Integrity, and Campus Safety}
+
+\author{\IEEEauthorblockN{Author 1, Author 2, Author 3}
+\IEEEauthorblockA{Department Name, Institution Name \\
+City, Country \\
+email1@domain.com, email2@domain.com, email3@domain.com}}
+
+\maketitle
+
+\begin{abstract}
+This paper presents SmartCampus, a full-stack campus management platform that integrates academic administration, attendance workflows, financial operations, examination management, and campus safety services into a unified role-aware architecture. The implementation uses a React frontend with protected routing and a PHP/MySQL backend with token-based API access. SmartCampus supports multiple institutional roles, including administrator, teacher, student, head of department, coordinator, registrar, accountant, exam controller, placement officer, parent, dean, hostel warden, librarian, and student affairs. A key contribution is an attendance integrity pipeline combining active session controls, bearer-token checks, network-prefix verification, and duplicate prevention. Repository-based analysis confirms broad functional coverage and successful production builds, while also identifying engineering gaps in lint compliance and endpoint hardening consistency. The paper reports architecture, implementation evidence, quality findings, and a production hardening strategy.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Campus Management System, Role-Based Access Control, Attendance Integrity, Campus Safety, React, PHP, MySQL
+\end{IEEEkeywords}
+
+\section{Introduction}
+Higher education institutions increasingly require integrated digital infrastructure that can coordinate academic operations, student services, safety, and governance. Many deployments remain fragmented across standalone tools, resulting in duplicated data, delayed actions, and inconsistent policy enforcement. SmartCampus addresses this problem through a role-aware web platform that maps operational responsibilities to scoped interfaces and backend actions.
+
+The implementation targets practical institutional usage with broad role coverage and incremental extensibility. Beyond traditional student and teacher management, the platform includes attendance integrity controls, SOS workflows, live location monitoring, registrar and accountant services, and advanced analytics modules.
+
+The objective of this paper is twofold: (1) document the architecture and implementation of SmartCampus, and (2) provide an evidence-based technical analysis of the current codebase, including strengths, risks, and hardening priorities. The design follows service and access-control principles commonly used in modern web systems and role-based governance models~\cite{fowler_poeaa,fielding_rest,rbac_nist,owasp_top10}.
+
+\section{System Overview}
+\subsection{Technology Stack}
+SmartCampus adopts a web client--server model:
+\begin{itemize}
+    \item Frontend: React, React Router, Vite, Bootstrap, and Leaflet~\cite{react_docs,vite_docs,leaflet_docs,bootstrap_docs}.
+    \item Backend: PHP API endpoints with MySQL persistence~\cite{php_docs,mysql_docs}.
+    \item Authentication: login-issued bearer token stored client-side and attached to API requests.
+\end{itemize}
+
+\subsection{Role-Aware Functional Scope}
+The platform includes role-specific layouts and routes for 14+ roles. Major feature domains include:
+\begin{itemize}
+    \item Core academics: student/teacher management, department and class workflows.
+    \item Attendance: session creation, attendance marking, duplicate prevention, verification and analytics.
+    \item Safety: live location tracking, campus in/out status, SOS reporting and retrieval.
+    \item Offices: registrar, accountant, exam controller, placement, dean, librarian, hostel administration.
+\end{itemize}
+
+\subsection{Evidence from Codebase Inventory}
+Source-only inventory indicates approximately 140 frontend source files and 262 backend source files, confirming substantial implementation breadth.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox{0.45\textwidth}{\centering
+\textbf{Architecture Overview}\newline
+React role-aware UI \(\rightarrow\) PHP API domain endpoints \(\rightarrow\) MySQL storage\newline
+Cross-cutting: token validation, role checks, audit logging}}
+\caption{SmartCampus high-level architecture used in this submission.}
+\label{fig:architecture}
+\end{figure}
+
+\section{Architecture and Data Flow}
+\subsection{Authentication and Access Control Flow}
+The login flow validates credentials and returns role metadata and an API token. A frontend fetch wrapper attaches the bearer token to subsequent requests. Protected routes enforce role checks on the client, while backend endpoints validate token and role for protected resources. This aligns with the separation between client convenience checks and server-authoritative authorization~\cite{owasp_top10}.
+
+\subsection{Attendance Integrity Pipeline}
+Attendance integrity is implemented using the following sequence:
+\begin{enumerate}
+    \item Teacher starts session with subject/class context.
+    \item Session stores active status and network identity (gateway/prefix).
+    \item Student requests attendance mark using authenticated token.
+    \item Backend validates session activity, token validity, network compatibility, and duplicate status.
+    \item Attendance record is stored or rejected with reason logging.
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox{0.45\textwidth}{\centering
+Teacher starts attendance session\newline
+\(\downarrow\)
+Student submits mark request\newline
+\(\downarrow\)
+Token + session + duplicate + network checks\newline
+\(\downarrow\)
+Store attendance or log rejection}}
+\caption{Attendance integrity sequence implemented in backend APIs.}
+\label{fig:attendance-seq}
+\end{figure}
+
+\subsection{Safety and Live Monitoring Flow}
+Students periodically publish geolocation updates. Backend computes campus status using boundary checks and persists live coordinates. SOS endpoints accept emergency triggers and role-scoped views retrieve alerts for response teams.
+
+\section{Implementation Analysis}
+\subsection{Quality and Build Evidence}
+Frontend production build succeeds (Vite), but reports large bundle chunk warnings. Build output indicates a minified main JavaScript bundle near 960~kB and CSS around 341~kB, suggesting optimization headroom via code splitting and route-level chunking.
+
+Lint reports identify React Hook rule violations and unused-variable issues in several pages, indicating maintainability and runtime-stability risks if unresolved.
+
+\subsection{Security Posture (Observed)}
+Positive controls observed in core paths:
+\begin{itemize}
+    \item Token verification for protected APIs.
+    \item Role-based gatekeeping on multiple endpoints.
+    \item Duplicate attendance prevention and rejection logs.
+    \item Session lifecycle checks in attendance workflows.
+\end{itemize}
+
+Risk areas observed in broader codebase:
+\begin{itemize}
+    \item Inconsistent endpoint hardening patterns.
+    \item Mixed input sanitization approaches across modules.
+    \item Presence of endpoints with permissive CORS headers requiring tighter production policy.
+\end{itemize}
+
+\section{Module Coverage Summary}
+\begin{table}[htbp]
+\caption{SmartCampus Module Coverage}
+\label{tab:modules}
+\centering
+\begin{tabular}{p{3.1cm}p{4.7cm}}
+\toprule
+\textbf{Domain} & \textbf{Representative Capabilities} \\
+\midrule
+Academic Core & Student/teacher records, departments, class workflows \\
+Attendance & Session start/end, mark attendance, verification, anomaly detection \\
+Safety & Live location, SOS raise/retrieve, role-scoped incident visibility \\
+Registrar & Records, admissions, certificates, ID card request workflows \\
+Accounts & Fees, payment logs, financial summaries, cost centers, budgets \\
+Examination & Schedules, marks, results, moderation, revaluation flows \\
+Advanced Analytics & Risk prediction, policy compliance, sentiment, dependencies \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Objective Repository Evidence Used in This Paper}
+\label{tab:evidence}
+\centering
+\begin{tabular}{p{2.4cm}p{2.2cm}p{2.8cm}}
+\toprule
+\textbf{Metric} & \textbf{Observed Value} & \textbf{Evidence Source} \\
+\midrule
+Frontend source scale & 140 files & project source inventory \\
+Backend source scale & 262 files & project source inventory \\
+Production build & Successful & frontend build output log \\
+Main JS bundle & \~959.61~kB & frontend build output log \\
+Lint status & Not clean & frontend lint error log \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Evaluation and Reproducibility}
+This submission uses repository artifacts for reproducible implementation analysis:
+\begin{itemize}
+    \item Build output for bundling and production-compile status.
+    \item Lint error report for static quality signals.
+    \item Source inventory files for implementation scale and module breadth.
+\end{itemize}
+
+Table~\ref{tab:evidence} summarizes the directly measured indicators used in this paper. These indicators are objective and reproducible from repository artifacts, but they do not replace controlled runtime benchmarking.
+
+For extended evaluation in future work, the following protocol is recommended:
+\begin{itemize}
+    \item API latency under nominal load (e.g., 50/100/200 concurrent users).
+    \item Attendance validation success/rejection rates under controlled network scenarios.
+    \item Mean time to detect and display SOS alerts by role.
+    \item Task completion time and SUS-based user usability survey by role group.
+\end{itemize}
+
+\section{Limitations}
+The present manuscript is implementation-validated but not benchmark-complete. Some dashboard values are static in selected frontend pages and should be replaced by fully audited backend telemetry in subsequent evaluation rounds.
+
+\section{Hardening Roadmap}
+Priority actions for production readiness:
+\begin{enumerate}
+    \item Enforce centralized auth middleware across all write endpoints.
+    \item Replace string-concatenated SQL with prepared statements project-wide.
+    \item Resolve frontend hook-order lint violations and add CI checks.
+    \item Apply route-level lazy loading to reduce initial bundle size.
+    \item Introduce automated API/security regression tests.
+\end{enumerate}
+
+\section{Conclusion}
+SmartCampus demonstrates a practical and extensible architecture for integrated campus operations with broad role coverage and operational modules spanning academics, attendance, safety, and institutional administration. The system already offers substantial functional depth and deployment viability. With systematic hardening, benchmark-backed evaluation, and quality-gate automation, SmartCampus can evolve from a rich prototype into a production-grade digital campus platform.
+
+\section*{Acknowledgment}
+The authors thank the institutional stakeholders and development contributors who supported requirements collection, module validation, and deployment feedback.
+
+\bibliographystyle{IEEEtran}
+\bibliography{02_references}
+
+\end{document}

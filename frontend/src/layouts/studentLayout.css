@@ -1,0 +1,372 @@
+.layout-container{
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:#0b5ed7;
+  color:white;
+  transition:0.3s;
+  overflow-y:auto;
+}
+.sidebar.open{ width:250px; }
+.sidebar:not(.open){ width:0; overflow:hidden; }
+
+.sidebar-header{
+  padding:20px;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.menu{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.menu li{
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.menu li a{
+  display:block;
+  padding:12px 18px;
+  color:white;
+  text-decoration:none;
+  transition: 0.2s;
+}
+.menu li a:hover{
+  background:#0846a4;
+}
+.logout{
+  margin-top:30px;
+}
+.logout a{
+  background:#dc3545;
+  display:block;
+  color:white;
+  padding:12px 18px;
+  text-decoration:none;
+  text-align:center;
+  font-weight:600;
+  transition: 0.2s;
+}
+.logout a:hover{
+  background:#c82333;
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  background:#f8f9fa;
+}
+
+/* TOPBAR */
+.topbar{
+  background:white;
+  height:60px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+.menu-btn{
+  border:none;
+  background:#0b5ed7;
+  color:white;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:0.2s;
+  font-size:16px;
+}
+.menu-btn:hover{
+  background:#0846a4;
+}
+.profile{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.profile-pic{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:gray;
+  flex-shrink:0;
+}
+
+/* PAGE */
+.page{
+  padding:20px;
+  overflow-y:auto;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
+
+/* TABLET - LANDSCAPE (1024px and below) */
+@media (max-width:1024px){
+  .sidebar{
+    width:220px;
+  }
+  .page{
+    padding:16px;
+  }
+}
+
+/* TABLET - PORTRAIT (768px and below) */
+@media (max-width:768px){
+  .layout-container{
+    flex-direction:column;
+  }
+
+  .sidebar{
+    position:fixed;
+    top:60px;
+    left:0;
+    width:250px;
+    height:calc(100vh - 60px);
+    z-index:999;
+    transform:translateX(-100%);
+    border-right:1px solid #e9ecef;
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+    box-shadow:2px 0 8px rgba(0,0,0,0.2);
+  }
+
+  .content{
+    width:100%;
+    height:calc(100vh - 60px);
+  }
+
+  .topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    width:100%;
+    height:60px;
+    z-index:1000;
+    padding:0 12px;
+  }
+
+  .page{
+    margin-top:0;
+    padding:16px 12px;
+  }
+
+  .profile{
+    gap:6px;
+  }
+
+  .profile-pic{
+    width:28px;
+    height:28px;
+  }
+}
+
+/* MOBILE - Standard (480px - 768px) */
+@media (max-width:480px){
+  .sidebar{
+    width:240px;
+  }
+
+  .sidebar-header{
+    padding:12px 14px;
+  }
+
+  .menu li a{
+    padding:10px 14px;
+    font-size:13px;
+  }
+
+  .topbar{
+    padding:0 10px;
+    height:50px;
+  }
+
+  .menu-btn{
+    padding:4px 8px;
+    font-size:14px;
+  }
+
+  .page{
+    padding:12px 10px;
+  }
+
+  .profile{
+    gap:4px;
+    font-size:12px;
+  }
+
+  .profile-pic{
+    width:26px;
+    height:26px;
+  }
+
+  /* Container adjustments */
+  .container,
+  .container-fluid{
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  /* Card adjustments */
+  .card{
+    border-radius:6px;
+    margin-bottom:10px;
+  }
+
+  /* Button adjustments - touch friendly */
+  .btn{
+    padding:10px 12px;
+    font-size:12px;
+    min-height:44px;
+  }
+
+  .btn-sm{
+    padding:6px 10px;
+    font-size:11px;
+  }
+
+  /* Form adjustments */
+  .form-control,
+  .form-select{
+    font-size:16px;
+    padding:8px;
+    margin-bottom:8px;
+  }
+
+  .form-label{
+    font-size:12px;
+    margin-bottom:4px;
+  }
+
+  /* Table responsive */
+  .table{
+    font-size:12px;
+  }
+
+  .table thead{
+    display:none;
+  }
+
+  .table tbody tr{
+    display:block;
+    border:1px solid #ddd;
+    margin-bottom:10px;
+    border-radius:4px;
+    background:white;
+  }
+
+  .table tbody td{
+    display:block;
+    text-align:right;
+    padding:8px;
+    border:none;
+    position:relative;
+    padding-left:50%;
+  }
+
+  .table tbody td::before{
+    content:attr(data-label);
+    position:absolute;
+    left:8px;
+    text-align:left;
+    font-weight:600;
+    color:#666;
+  }
+
+  /* Grid responsive */
+  .col-md-6,
+  .col-md-4,
+  .col-md-3,
+  .col-lg-6,
+  .col-lg-4{
+    width:100% !important;
+    margin-bottom:10px;
+  }
+
+  /* Alert adjustments */
+  .alert{
+    padding:10px 12px;
+    font-size:12px;
+    margin-bottom:10px;
+  }
+
+  /* Badge adjustments */
+  .badge{
+    font-size:10px;
+    padding:3px 6px;
+  }
+
+  /* Modal responsive */
+  .modal-dialog{
+    margin:0;
+    max-width:100%;
+    height:100vh;
+    width:100vw;
+  }
+
+  .modal-content{
+    border-radius:0;
+    max-height:100vh;
+  }
+}
+
+/* MOBILE - Extra Small (320px - 479px) */
+@media (max-width:359px){
+  .sidebar{
+    width:220px;
+  }
+
+  .sidebar-header{
+    padding:10px 10px;
+  }
+
+  .sidebar-header h5{
+    font-size:14px;
+    margin:0;
+  }
+
+  .menu li a{
+    padding:8px 10px;
+    font-size:12px;
+  }
+
+  .topbar{
+    padding:0 8px;
+    height:48px;
+  }
+
+  .menu-btn{
+    padding:2px 6px;
+    font-size:12px;
+  }
+
+  .page{
+    padding:10px 8px;
+  }
+
+  .profile{
+    font-size:10px;
+  }
+
+  .btn{
+    padding:8px 10px;
+    font-size:11px;
+  }
+
+  .form-control,
+  .form-select{
+    font-size:15px;
+    padding:6px;
+  }
+}
