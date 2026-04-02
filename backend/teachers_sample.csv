@@ -1,0 +1,6 @@
+name,gender,dob,staff_id,dept,phone,email
+John David,Male,1982-05-21,STF101,CSE,9876543210,teacher1@college.com
+Priya Sharma,Female,1987-03-18,STF102,IT,9876543211,teacher2@college.com
+Arun Kumar,Male,1985-07-02,STF103,EEE,9876543212,teacher3@college.com
+Lakshmi Devi,Female,1990-01-11,STF104,ECE,9876543213,teacher4@college.com
+Rahul Mehta,Male,1983-08-25,STF105,CIVIL,9876543214,teacher5@college.com

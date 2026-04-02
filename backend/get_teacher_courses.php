@@ -1,0 +1,21 @@
+<?php
+header("Content-Type: application/json");
+include "config.php";
+
+$teacher_id = $_GET["teacher_id"];
+
+$q = mysqli_query($conn,"
+SELECT * FROM teacher_courses 
+WHERE teacher_id='$teacher_id'
+");
+
+$data = [];
+while($r=mysqli_fetch_assoc($q)){
+  $data[]=$r;
+}
+
+echo json_encode([
+ "status"=>true,
+ "courses"=>$data
+]);
+?>
