@@ -133,6 +133,7 @@ export default function AdminDepartments() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>HOD</th>
                 <th style={{ width: "180px" }}>Actions</th>
               </tr>
             </thead>
@@ -140,6 +141,7 @@ export default function AdminDepartments() {
               {departments.map((dept, index) => (
                 <tr key={dept.id || dept.dept_name || index}>
                   <td>{dept.dept_name}</td>
+                  <td>{dept.hod_name || "-"}</td>
                   <td>
                     <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEdit(dept)}>
                       Edit
@@ -152,7 +154,7 @@ export default function AdminDepartments() {
               ))}
               {departments.length === 0 && (
                 <tr>
-                  <td colSpan="2" className="text-center">No departments found.</td>
+                  <td colSpan="3" className="text-center">No departments found.</td>
                 </tr>
               )}
             </tbody>

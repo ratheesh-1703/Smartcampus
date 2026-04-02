@@ -2,12 +2,13 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import campusBuildings from "../data/campusBuilding";
-import { buildUrl } from "../utils/apiClient";
+import { buildUrl, apiCall } from "../utils/apiClient";
 
 export default function CampusLiveMap(){
 
   const [students, setStudents] = useState([]);
   const [searchReg, setSearchReg] = useState("");
+  const [dept, setDept] = useState(null);
   const mapRef = useRef(null);
   const markerRefs = useRef({});
 
@@ -20,10 +21,53 @@ export default function CampusLiveMap(){
     [9.5785, 77.6865]
   ];
 
+  const loadDept = async () => {
+    const stored = JSON.parse(localStorage.getItem("user") || "{}");
+    const role = stored?.role;
+
+    // Admin sees all students
+    if (role === "admin" || role === "affairs") {
+      return null; // No department filter
+    }
+
+    // For HOD, coordinator, subject_controller - get their department
+    let detectedDept = stored?.user?.dept || stored?.dept || null;
+
+    if (!detectedDept && (role === "hod" || role === "coordinator" || role === "subject_controller")) {
+      try {
+        const teacherId = stored?.teacher_id || stored?.linked_id || stored?.user?.teacher_id || stored?.user?.user_id || stored?.user?.id || stored?.user_id || stored?.id;
+        if (teacherId) {
+          const profile = await apiCall(buildUrl(`get_teacher_profile.php?id=${teacherId}`));
+          if (profile.status && profile.teacher) {
+            detectedDept = profile.teacher.dept || profile.teacher.department || null;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load department:", e);
+      }
+    }
+
+    return detectedDept;
+  };
+
   const loadLocations = async () => {
-    const res = await fetch(
-      buildUrl("get_live_locations.php")
-    );
+    const deptValue = await loadDept();
+    setDept(deptValue);
+
+    const stored = JSON.parse(localStorage.getItem("user") || "{}");
+    const role = stored?.role;
+    // If HOD and no department, show error and do not fetch
+    if ((role === "hod" || role === "coordinator" || role === "subject_controller") && !deptValue) {
+      setStudents([]);
+      return;
+    }
+
+    let url = buildUrl("get_live_locations.php");
+    if (deptValue) {
+      url += `?dept=${encodeURIComponent(deptValue)}`;
+    }
+
+    const res = await fetch(url);
     const data = await res.json();
     if(data.status){
       setStudents(data.students);
@@ -127,8 +171,8 @@ export default function CampusLiveMap(){
           }}
         />
 
-        {/* 👨‍🎓 STUDENTS */}
-        {students.map((s)=>(
+        {/* 👨‍🎓 STUDENTS (unique reg_no only) */}
+        {Array.from(new Map(students.map(s => [s.reg_no, s])).values()).map((s) => (
           <Marker
             key={s.reg_no}
             position={[s.latitude, s.longitude]}

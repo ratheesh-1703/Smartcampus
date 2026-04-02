@@ -4,8 +4,16 @@ import { apiCall, buildUrl } from "../utils/apiClient";
 export default function StudentProfilePage(){
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
-  // login may store { role, user: { user_id, ... } } or a flat user object
-  const user_id = user?.user?.user_id || user?.user_id || user?.user?.id || user?.id;
+  // Extract student_id like other student pages
+  const student_id =
+    user?.student_id ||
+    user?.linked_id ||
+    user?.user?.student_id ||
+    user?.user?.linked_id ||
+    user?.user?.user_id ||
+    user?.user?.id ||
+    user?.user_id ||
+    user?.id;
 
   const [s,setS] = useState(null);
   const [error, setError] = useState(null);
@@ -13,16 +21,16 @@ export default function StudentProfilePage(){
   const loadProfile = async ()=>{
     try{
       setError(null);
-      const data = await apiCall(buildUrl("get_student_profile_portal.php"), {
-        method: "POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify({ user_id })
-      });
+      const data = await apiCall(buildUrl(`get_student_profile_portal.php?student_id=${student_id}`));
 
       if(data?.status){
         setS(data.student);
       } else {
-        setError(data?.message || 'Failed to load profile');
+        if(data?.message === "Student Not Found"){
+          setError("Student profile data not found. Please contact administrator.");
+        } else {
+          setError(data?.message || 'Failed to load profile');
+        }
       }
     }catch(err){
       console.error('Failed to load student profile (portal)', err);
@@ -31,12 +39,12 @@ export default function StudentProfilePage(){
   };
 
   useEffect(()=>{
-    if(!user_id){
-      setError('Not logged in');
+    if(!student_id){
+      setError('Student ID not found. Please log in again.');
       return;
     }
     loadProfile();
-  },[user_id]);
+  },[student_id]);
 
   if(error) return <h3 className="m-4 text-danger">Error: {error}</h3>;
   if(!s) return <h3 className="m-4">Loading Profile...</h3>;
@@ -78,10 +86,10 @@ export default function StudentProfilePage(){
 
               <div className="col-md-6">
                 <h6 className="text-primary">Academic</h6>
-                <p><b>Course:</b> {s.course}</p>
+                <p><b>Department:</b> {s.dept}</p>
                 <p><b>Year:</b> {s.year}</p>
-                <p><b>Section:</b> {s.section}</p>
-                <p><b>Admission Year:</b> {s.admission_year}</p>
+                <p><b>Semester:</b> {s.semester}</p>
+                <p><b>Registration No:</b> {s.reg_no}</p>
               </div>
 
               <div className="col-md-6">
@@ -98,16 +106,12 @@ export default function StudentProfilePage(){
             <div className="row">
               <div className="col-md-6">
                 <h6 className="text-primary">Contact</h6>
+                <p><b>Email:</b> {s.student_email}</p>
                 <p><b>Phone:</b> {s.student_phone}</p>
                 <p><b>Address:</b> {s.address}</p>
                 <p><b>City:</b> {s.city}</p>
-              </div>
-
-              <div className="col-md-6">
-                <h6 className="text-primary">Parent</h6>
-                <p><b>Father:</b> {s.father_name}</p>
-                <p><b>Mother:</b> {s.mother_name}</p>
-                <p><b>Parent Phone:</b> {s.parent_phone}</p>
+                <p><b>State:</b> {s.state}</p>
+                <p><b>Pincode:</b> {s.pincode}</p>
               </div>
             </div>
 

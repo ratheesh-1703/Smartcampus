@@ -7,7 +7,7 @@ export const BASE_URL = (() => {
   try {
     const viteEnv = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : null;
     if (viteEnv && viteEnv.DEV) {
-      return '/SmartCampus/backend';
+      return '/backend';
     }
     const url = viteEnv ? (viteEnv.VITE_API_URL || viteEnv.REACT_APP_API_URL) : null;
     if (url) return String(url).replace(/\/$/, '');
@@ -38,7 +38,7 @@ export const BASE_URL = (() => {
     const isLocalHost = host === 'localhost' || host === '127.0.0.1';
     const isPrivateLan = /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
     if (isLocalHost || isPrivateLan) {
-      return `${window.location.origin}/SmartCampus/backend`;
+      return `${window.location.origin}/backend`;
     }
 
     return QUICK_TUNNEL_BACKEND;
@@ -59,22 +59,33 @@ export const fetchJSON = async (url, options = {}) => {
     const contentType = response.headers.get('content-type');
     const text = await response.text();
 
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('Backend returned non-JSON response:', {
-        url,
-        status: response.status,
-        contentType,
-        body: text.substring(0, 200)
-      });
-
-      throw new Error(
-        `Server returned ${response.status} ${response.statusText}. ` +
-        `Expected JSON but got ${contentType || 'text/html'}. ` +
-        `URL: ${url}`
-      );
-    }
-
     try {
+      if (!contentType || !contentType.includes('application/json')) {
+        const trimmed = text.trim();
+        const looksLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+
+        if (!looksLikeJson) {
+          console.error('Backend returned non-JSON response:', {
+            url,
+            status: response.status,
+            contentType,
+            body: text.substring(0, 200)
+          });
+
+          throw new Error(
+            `Server returned ${response.status} ${response.statusText}. ` +
+            `Expected JSON but got ${contentType || 'text/html'}. ` +
+            `URL: ${url}`
+          );
+        }
+
+        console.warn('Backend returned JSON with non-JSON content-type:', {
+          url,
+          status: response.status,
+          contentType
+        });
+      }
+
       return JSON.parse(text);
     } catch {
       console.error('Backend returned invalid JSON:', {

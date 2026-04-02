@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { apiCall, buildUrl } from "../utils/apiClient";
 
 export default function HODSubjectControllers() {
+  const auth = JSON.parse(localStorage.getItem("user") || "{}");
+  const hodTeacherId =
+    auth?.user?.linked_id ||
+    auth?.linked_id ||
+    auth?.user?.teacher_id ||
+    auth?.teacher_id ||
+    auth?.user?.id ||
+    auth?.id ||
+    null;
+
   const [loading, setLoading] = useState(true);
   const [dept, setDept] = useState("");
   const [teachers, setTeachers] = useState([]);
@@ -14,7 +24,8 @@ export default function HODSubjectControllers() {
     setLoading(true);
     setNotice("");
 
-    const res = await apiCall(buildUrl("get_subject_controllers.php"));
+    const suffix = hodTeacherId ? `?teacher_id=${encodeURIComponent(hodTeacherId)}` : "";
+    const res = await apiCall(buildUrl(`get_subject_controllers.php${suffix}`));
     if (res.status) {
       setDept(res.dept || "");
       setTeachers(res.teachers || []);
@@ -27,7 +38,7 @@ export default function HODSubjectControllers() {
 
   useEffect(() => {
     loadControllers();
-  }, []);
+  }, [hodTeacherId]);
 
   const updateController = async (teacherId, action) => {
     const res = await apiCall(buildUrl("assign_subject_controller.php"), {

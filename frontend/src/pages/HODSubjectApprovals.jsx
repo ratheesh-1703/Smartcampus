@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { apiCall, buildUrl } from "../utils/apiClient";
 
 export default function HODSubjectApprovals() {
+  const auth = JSON.parse(localStorage.getItem("user") || "{}");
+  const hodTeacherId =
+    auth?.user?.linked_id ||
+    auth?.linked_id ||
+    auth?.user?.teacher_id ||
+    auth?.teacher_id ||
+    auth?.user?.id ||
+    auth?.id ||
+    null;
+
   const [dept, setDept] = useState("");
   const [plans, setPlans] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -13,7 +23,8 @@ export default function HODSubjectApprovals() {
     setLoading(true);
     setNotice("");
 
-    const ctrl = await apiCall(buildUrl("get_subject_controllers.php"));
+    const suffix = hodTeacherId ? `?teacher_id=${encodeURIComponent(hodTeacherId)}` : "";
+    const ctrl = await apiCall(buildUrl(`get_subject_controllers.php${suffix}`));
     if (!ctrl.status) {
       setNotice(ctrl.message || "Failed to load department");
       setLoading(false);
@@ -43,7 +54,7 @@ export default function HODSubjectApprovals() {
 
   useEffect(() => {
     loadAll();
-  }, []);
+  }, [hodTeacherId]);
 
   const decidePlan = async (planId, decision) => {
     const reason = decision === "rejected" ? prompt("Reason for rejection:") || "" : "";

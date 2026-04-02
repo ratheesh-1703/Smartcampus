@@ -35,8 +35,13 @@ const uploadStudents = async ()=>{
 
     setMsg(data.message || "Done");
 
-  }catch{
-    setMsg("Backend offline ❌");
+  }catch(err){
+    const errorText = String(err?.message || "");
+    if (errorText.includes("ERR_UPLOAD_FILE_CHANGED")) {
+      setMsg("Selected file changed on disk. Please reselect the CSV and upload again.");
+      return;
+    }
+    setMsg("Upload failed ❌ Please check server and retry.");
   }
 };
 

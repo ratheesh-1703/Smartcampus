@@ -15,6 +15,8 @@ const normalizeRole = (rawRole) => {
     placement_officer: "placement_officer",
     hostelwarden: "hostel_warden",
     hostel_warden: "hostel_warden",
+    subjectcontroller: "subject_controller",
+    subject_controller: "subject_controller",
     hod: "hod",
     faculty: "teacher",
   };
@@ -35,10 +37,9 @@ export default function RequireAuth({ roles = [], children }) {
   const location = useLocation();
   const stored = getStoredUser();
   const role = normalizeRole(stored?.role || stored?.user?.role);
-  const token = stored?.token || stored?.user?.token;
   const normalizedRoles = roles.map((item) => normalizeRole(item));
 
-  if (!stored || !role || !token) {
+  if (!stored || !role) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

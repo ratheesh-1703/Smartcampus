@@ -104,7 +104,9 @@ export default function StudentDashboard() {
         const fees = await apiCall(
           buildUrl(`get_student_fees.php?student_id=${student_id}`)
         );
-        const request = await apiCall(buildUrl("get_logout_requests.php"));
+        const request = await apiCall(
+          buildUrl(`get_logout_requests.php?student_id=${encodeURIComponent(student_id)}`)
+        );
 
         setSummary({
           attendance: history?.percentage || 0,

@@ -5,6 +5,7 @@ export default function AffairsSOS(){
 
   const [alerts,setAlerts] = useState([]);
   const [msg,setMsg] = useState("");
+  const [busyId, setBusyId] = useState(null);
 
   const loadAlerts = async ()=>{
     let res = await fetch(buildUrl("get_sos.php"));
@@ -28,6 +29,31 @@ export default function AffairsSOS(){
     return ()=>clearInterval(i);
   },[]);
 
+  const completeSOS = async (id)=>{
+    if(!id || busyId) return;
+    setBusyId(id);
+
+    try {
+      const res = await fetch(buildUrl("resolve_sos.php"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+
+      const data = await res.json();
+      if(data?.status){
+        setMsg("SOS marked as completed");
+        await loadAlerts();
+      } else {
+        setMsg(data?.message || "Failed to complete SOS");
+      }
+    } catch {
+      setMsg("Network error while completing SOS");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   return(
     <div className="container mt-4">
       <div className="card p-4 shadow">
@@ -47,6 +73,7 @@ export default function AffairsSOS(){
               <th>Location</th>
               <th>Photo</th>
               <th>Time</th>
+              <th>Action</th>
             </tr>
           </thead>
 
@@ -74,12 +101,21 @@ export default function AffairsSOS(){
                 </td>
 
                 <td>{s.created_at}</td>
+                <td className="text-nowrap">
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => completeSOS(s.id)}
+                    disabled={busyId === s.id}
+                  >
+                    {busyId === s.id ? "Completing..." : "Complete"}
+                  </button>
+                </td>
               </tr>
             ))}
 
             {alerts.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center">
+                <td colSpan={6} className="text-center">
                   No Active SOS Alerts
                 </td>
               </tr>

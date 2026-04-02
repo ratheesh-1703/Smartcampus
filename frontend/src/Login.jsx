@@ -16,6 +16,8 @@ const normalizeRole = (rawRole) => {
     placement_officer: "placement_officer",
     hostelwarden: "hostel_warden",
     hostel_warden: "hostel_warden",
+    subjectcontroller: "subject_controller",
+    subject_controller: "subject_controller",
     hod: "hod",
     faculty: "teacher",
   };
@@ -65,10 +67,13 @@ export default function Login(){
 
       const normalizedRole = normalizeRole(data.role || data?.user?.role);
 
-      // SAVE minimal user info and token if present
+      // SAVE user info with all fields from response
       const toStore = {
         role: normalizedRole,
-        user: { ...(data.user || data), role: normalizedRole },
+        user: { ...(data.user || {}), role: normalizedRole },
+        teacher_id: data.teacher_id,
+        student_id: data.student_id,
+        linked_id: data.linked_id,
       };
       if (data.token) toStore.token = data.token;
       localStorage.setItem("user", JSON.stringify(toStore));
@@ -81,6 +86,7 @@ export default function Login(){
         "student": "/student",
         "affairs": "/affairs",
         "hod": "/hod",
+        "subject_controller": "/subject-controller",
         "coordinator": "/coordinator",
         "accountant": "/accountant",
         "registrar": "/registrar",

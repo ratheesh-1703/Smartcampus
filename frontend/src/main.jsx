@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, Component } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./components/RequireAuth";
@@ -80,6 +80,7 @@ import AffairsReports from "./pages/AffairsReports";
 import AdminLayout from "./layouts/AdminLayout";
 import TeacherLayout from "./layouts/TeacherLayout";
 import HODLayout from "./layouts/HODLayout";
+import SubjectControllerLayout from "./layouts/SubjectControllerLayout";
 import CoordinatorLayout from "./layouts/CoordinatorLayout";
 import AffairsLayout from "./layouts/AffairsLayout";
 import StudentLayout from "./layouts/StudentLayout";
@@ -149,6 +150,59 @@ import CampusMap from "./pages/CampusMap";
 import ChangePassword from "./pages/ChangePassword";
 import UserProfilePage from "./pages/UserProfilePage";
 
+const sanitizeStoredAuth = () => {
+  if (typeof window === "undefined") return;
+
+  const raw = localStorage.getItem("user");
+  if (!raw) return;
+
+  try {
+    JSON.parse(raw);
+  } catch {
+    localStorage.removeItem("user");
+  }
+};
+
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, message: "" };
+  }
+
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      message: error?.message || "Unexpected application error"
+    };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("App crash caught by boundary:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>
+          <h3>Something went wrong</h3>
+          <p>{this.state.message}</p>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              localStorage.removeItem("user");
+              window.location.href = "/";
+            }}
+          >
+            Reset session and reload
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const ensureAuthHeader = () => {
   if (typeof window === "undefined" || !window.fetch) return;
   const originalFetch = window.fetch.bind(window);
@@ -177,11 +231,13 @@ const ensureAuthHeader = () => {
 };
 
 ensureAuthHeader();
+sanitizeStoredAuth();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
+    <AppErrorBoundary>
+      <BrowserRouter>
+        <Routes>
 
         {/* LOGIN */}
         <Route path="/" element={<Login />} />
@@ -281,6 +337,23 @@ createRoot(document.getElementById("root")).render(
           <Route path="marks" element={<TeacherMarks />} />
           <Route path="timetable" element={<TeacherTimeTable />} />
           <Route path="biometric" element={<TeacherBiometric />} />
+        </Route>
+
+        {/* SUBJECT CONTROLLER */}
+        <Route
+          path="/subject-controller"
+          element={
+            <RequireAuth roles={["subject_controller"]}>
+              <SubjectControllerLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<SubjectControllerTools />} />
+          <Route path="profile" element={<TeacherProfilePage />} />
+          <Route path="students" element={<TeacherStudents />} />
+          <Route path="attendance" element={<TeacherAttendance />} />
+          <Route path="marks" element={<TeacherMarks />} />
+          <Route path="timetable" element={<TeacherTimeTable />} />
         </Route>
 
         {/* AFFAIRS */}
@@ -513,7 +586,8 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AppErrorBoundary>
   </StrictMode>
 );

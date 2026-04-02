@@ -2,8 +2,15 @@ import { useEffect, useState } from "react";
 import { apiCall, buildUrl } from "../utils/apiClient";
 
 export default function HODProfilePage(){
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const teacher_id = user?.user?.linked_id || user?.user?.teacher_id || user?.linked_id || user?.teacher_id;
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const teacher_id =
+    user?.user?.linked_id ||
+    user?.linked_id ||
+    user?.user?.teacher_id ||
+    user?.teacher_id ||
+    user?.user?.id ||
+    user?.id ||
+    null;
   const [teacher, setTeacher] = useState(null);
   const [error, setError] = useState(null);
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiCall, buildUrl } from "../utils/apiClient";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -7,26 +8,88 @@ export default function AdminDashboard() {
     activeSessions: 0,
     sosAlerts: 0
   });
+  
+  const [systemStatus, setSystemStatus] = useState({
+    database: "Connected",
+    serverLoad: 0,
+    attendanceActive: 0
+  });
+
+  const [activities, setActivities] = useState([]);
   const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchSystemStatus();
+    fetchActivities();
+    
+    // Refresh all data every 30 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchSystemStatus();
+      fetchActivities();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStats = async () => {
     try {
-      // Mock data - replace with actual API calls
-      setStats({
-        totalStudents: 450,
-        totalTeachers: 28,
-        activeSessions: 12,
-        sosAlerts: 0
-      });
+      const data = await apiCall(buildUrl("admin_counts.php"));
+      if(data && (data.status || (data.students || data.teachers !== undefined))){
+        setStats({
+          totalStudents: parseInt(data.students) || 0,
+          totalTeachers: parseInt(data.teachers) || 0,
+          activeSessions: parseInt(data.activeSessions) || 0,
+          sosAlerts: parseInt(data.sos) || 0
+        });
+      }
     } catch (err) {
       console.error("Error fetching stats:", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchSystemStatus = async () => {
+    try {
+      const data = await apiCall(buildUrl("get_system_status.php"));
+      if(data?.status || data?.database){
+        setSystemStatus({
+          database: data.database || "Connected",
+          serverLoad: parseInt(data.serverLoad) || 0,
+          attendanceActive: parseInt(data.attendanceActive) || 0
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching system status:", err);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const data = await apiCall(buildUrl("get_recent_activities.php"));
+      if(data?.status && data?.activities){
+        setActivities(data.activities);
+      }
+    } catch (err) {
+      console.error("Error fetching activities:", err);
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    if(!timestamp) return "unknown";
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if(seconds < 60) return "just now";
+    if(seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if(seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if(seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    
+    return date.toLocaleDateString();
   };
 
   const StatCard = ({ icon, title, value, color }) => (
@@ -105,7 +168,9 @@ export default function AdminDashboard() {
                 <small className="text-muted">Database Status</small>
               </p>
               <div className="progress" style={{ height: '20px' }}>
-                <div className="progress-bar bg-success d-flex align-items-center justify-content-center" style={{ width: "100%", fontSize: '11px' }}>Connected</div>
+                <div className="progress-bar bg-success d-flex align-items-center justify-content-center" style={{ width: "100%", fontSize: '11px' }}>
+                  {systemStatus.database}
+                </div>
               </div>
             </div>
             <div className="mb-3">
@@ -113,7 +178,12 @@ export default function AdminDashboard() {
                 <small className="text-muted">Server Load</small>
               </p>
               <div className="progress" style={{ height: '20px' }}>
-                <div className="progress-bar bg-info d-flex align-items-center justify-content-center" style={{ width: "45%", fontSize: '11px' }}>45%</div>
+                <div 
+                  className={`progress-bar d-flex align-items-center justify-content-center ${systemStatus.serverLoad > 80 ? 'bg-danger' : systemStatus.serverLoad > 60 ? 'bg-warning' : 'bg-info'}`}
+                  style={{ width: `${systemStatus.serverLoad}%`, fontSize: '11px' }}
+                >
+                  {systemStatus.serverLoad}%
+                </div>
               </div>
             </div>
             <div>
@@ -121,7 +191,12 @@ export default function AdminDashboard() {
                 <small className="text-muted">Attendance Active</small>
               </p>
               <div className="progress" style={{ height: '20px' }}>
-                <div className="progress-bar bg-warning d-flex align-items-center justify-content-center" style={{ width: "30%", fontSize: '11px' }}>30%</div>
+                <div 
+                  className="progress-bar bg-warning d-flex align-items-center justify-content-center"
+                  style={{ width: `${systemStatus.attendanceActive}%`, fontSize: '11px' }}
+                >
+                  {systemStatus.attendanceActive}%
+                </div>
               </div>
             </div>
           </div>
@@ -135,34 +210,20 @@ export default function AdminDashboard() {
         </div>
         <div className="card-body p-2 p-md-3">
           <div className="activity-timeline">
-            <div className="activity-item mb-3">
-              <i className="bi bi-circle-fill text-primary"></i>
-              <div className="activity-content ms-2 ms-md-3">
-                <p className="mb-0 fw-bold small">New Student Registered</p>
-                <small className="text-muted">5 minutes ago</small>
-              </div>
-            </div>
-            <div className="activity-item mb-3">
-              <i className="bi bi-circle-fill text-success"></i>
-              <div className="activity-content ms-2 ms-md-3">
-                <p className="mb-0 fw-bold small">Attendance Session Started</p>
-                <small className="text-muted">15 minutes ago</small>
-              </div>
-            </div>
-            <div className="activity-item mb-3">
-              <i className="bi bi-circle-fill text-warning"></i>
-              <div className="activity-content ms-2 ms-md-3">
-                <p className="mb-0 fw-bold small">Bulk Import Completed</p>
-                <small className="text-muted">2 hours ago</small>
-              </div>
-            </div>
-            <div className="activity-item">
-              <i className="bi bi-circle-fill text-info"></i>
-              <div className="activity-content ms-2 ms-md-3">
-                <p className="mb-0 fw-bold small">System Backup Completed</p>
-                <small className="text-muted">Yesterday</small>
-              </div>
-            </div>
+            {activities.length > 0 ? (
+              activities.map((activity, idx) => (
+                <div key={idx} className="activity-item mb-3">
+                  <i className={`bi bi-circle-fill text-${activity.color}`}></i>
+                  <div className="activity-content ms-2 ms-md-3">
+                    <p className="mb-0 fw-bold small">{activity.icon} {activity.title}</p>
+                    <small className="text-muted d-block">{activity.description}</small>
+                    <small className="text-muted">{formatTimeAgo(activity.timestamp)}</small>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted text-center py-4">No recent activities</p>
+            )}
           </div>
         </div>
       </div>

@@ -56,23 +56,50 @@ export default function StudentProfile(){
         <input 
           type="file"
           className="form-control mb-3"
+          accept="image/*"
           onChange={async (e)=>{
+
+            const file = e.target.files[0];
+            if(!file){
+              alert("No file selected");
+              return;
+            }
+
+            console.log("Uploading file:", file.name, "Size:", file.size);
 
             const formData = new FormData();
             formData.append("id", id);
-            formData.append("photo", e.target.files[0]);
+            formData.append("photo", file);
 
-            let res = await fetch(
-              buildUrl("upload_student_photo.php"),
-              {
-                method:"POST",
-                body: formData
+            try {
+              console.log("Sending request to:", buildUrl("upload_student_photo.php"));
+              
+              let res = await fetch(
+                buildUrl("upload_student_photo.php"),
+                {
+                  method:"POST",
+                  body: formData
+                }
+              );
+
+              console.log("Response status:", res.status);
+              
+              if(!res.ok){
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
               }
-            );
 
-            let data = await res.json();
-            alert(data.message);
-            window.location.reload();
+              let data = await res.json();
+              console.log("Response data:", data);
+              
+              alert(data.message || "Upload completed");
+              
+              if(data.status){
+                window.location.reload();
+              }
+            } catch(err) {
+              console.error("Upload error:", err);
+              alert("Upload failed: " + err.message);
+            }
           }}
         />
 

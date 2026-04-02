@@ -4,8 +4,19 @@ import { apiCall, buildUrl } from "../utils/apiClient";
 export default function HODManageClassCoordinators() {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const hodTeacherId = user?.user?.linked_id;
-  let department = user?.user?.dept;
+  const hodTeacherId =
+    user?.user?.linked_id ||
+    user?.linked_id ||
+    user?.user?.teacher_id ||
+    user?.teacher_id ||
+    user?.user?.id ||
+    user?.id ||
+    null;
+
+  let department =
+    user?.user?.dept ||
+    user?.dept ||
+    "";
 
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -295,14 +306,12 @@ export default function HODManageClassCoordinators() {
       setMsg("❌ Department not loaded");
       return;
     }
-    
     setInitializing(true);
     setMsg("⏳ Initializing classes...");
-    
     try {
-      const data = await postJson("initialize_classes.php", {});
+      // Send department in POST body
+      const data = await postJson("initialize_classes.php", { department: fetchedDepartment });
       console.log("✓ Initialize response:", data);
-
       if (data.status) {
         const successMsg = `✅ Initialized ${data.created} new classes (${data.existing} existing)`;
         alert(successMsg);

@@ -10,7 +10,41 @@ export default function AffairsReports() {
     setLoading(true);
     const data = await apiCall(buildUrl("get_affairs_reports.php"));
     if (data.status) {
-      setSummary(data.summary || null);
+      const normalized = {
+        incidents: {
+          total: data?.summary?.incidents?.total ?? 0,
+          open: data?.summary?.incidents?.open ?? 0,
+          investigating: data?.summary?.incidents?.investigating ?? 0,
+          closed: data?.summary?.incidents?.closed ?? 0,
+          high: data?.summary?.incidents?.high ?? 0,
+          medium: data?.summary?.incidents?.medium ?? 0,
+          low: data?.summary?.incidents?.low ?? 0,
+        },
+        counseling: {
+          total: data?.summary?.counseling?.total ?? 0,
+          scheduled: data?.summary?.counseling?.scheduled ?? 0,
+          completed: data?.summary?.counseling?.completed ?? 0,
+          follow_up: data?.summary?.counseling?.follow_up ?? 0,
+        },
+        health: {
+          total: data?.summary?.health?.total ?? 0,
+          open: data?.summary?.health?.open ?? 0,
+          resolved: data?.summary?.health?.resolved ?? 0,
+          monitor: data?.summary?.health?.monitor ?? 0,
+        },
+        events: {
+          total: data?.summary?.events?.total ?? 0,
+          planned: data?.summary?.events?.planned ?? 0,
+          completed: data?.summary?.events?.completed ?? 0,
+          cancelled: data?.summary?.events?.cancelled ?? 0,
+        },
+        sos: {
+          total: data?.summary?.sos?.total ?? 0,
+          today: data?.summary?.sos?.today ?? 0,
+        },
+      };
+
+      setSummary(normalized);
       setError("");
     } else {
       setSummary(null);
