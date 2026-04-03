@@ -46,6 +46,7 @@ import TeacherTimeTable from "./pages/TeacherTimeTable";
 import TeacherBiometric from "./pages/TeacherBiometric";
 import TeacherCourses from "./pages/TeacherCourses";
 import TeacherGrades from "./pages/TeacherGrades";
+import SubjectControllerDashboard from "./pages/SubjectControllerDashboard";
 import SubjectControllerTools from "./pages/SubjectControllerTools";
 
 // Coordinator
@@ -274,7 +275,7 @@ createRoot(document.getElementById("root")).render(
         <Route
           path="/teacher"
           element={
-            <RequireAuth roles={["teacher"]}>
+            <RequireAuth roles={["teacher", "subject_controller"]}>
               <TeacherLayout />
             </RequireAuth>
           }
@@ -348,7 +349,8 @@ createRoot(document.getElementById("root")).render(
             </RequireAuth>
           }
         >
-          <Route index element={<SubjectControllerTools />} />
+          <Route index element={<SubjectControllerDashboard />} />
+          <Route path="planning" element={<SubjectControllerTools />} />
           <Route path="profile" element={<TeacherProfilePage />} />
           <Route path="students" element={<TeacherStudents />} />
           <Route path="attendance" element={<TeacherAttendance />} />

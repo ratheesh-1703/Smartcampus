@@ -16,6 +16,7 @@ export default function HODSubjectApprovals() {
   const [plans, setPlans] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [timetable, setTimetable] = useState([]);
+  const [pendingSubjects, setPendingSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
 
@@ -34,7 +35,7 @@ export default function HODSubjectApprovals() {
     const deptValue = ctrl.dept || "";
     setDept(deptValue);
 
-    const [plansRes, assignmentsRes, timetableRes] = await Promise.all([
+    const [plansRes, assignmentsRes, timetableRes, subjectsRes] = await Promise.all([
       apiCall(
         buildUrl(`list_class_subject_plans.php?dept=${encodeURIComponent(deptValue)}&status=pending`)
       ),
@@ -43,13 +44,29 @@ export default function HODSubjectApprovals() {
       ),
       apiCall(
         buildUrl(`list_class_timetable.php?dept=${encodeURIComponent(deptValue)}&status=pending`)
+      ),
+      apiCall(
+        buildUrl(`list_subjects.php?dept=${encodeURIComponent(deptValue)}`)
       )
     ]);
 
     setPlans(plansRes.status ? plansRes.plans || [] : []);
     setAssignments(assignmentsRes.status ? assignmentsRes.assignments || [] : []);
     setTimetable(timetableRes.status ? timetableRes.timetable || [] : []);
+    setPendingSubjects(subjectsRes.status ? (subjectsRes.subjects || []).filter(s => s.status === 'pending') : []);
     setLoading(false);
+  };
+
+  // Move decideSubject to top-level scope
+  const decideSubject = async (subjectId, decision) => {
+    const reason = decision === "rejected" ? prompt("Reason for rejection:") || "" : "";
+    const res = await apiCall(buildUrl("approve_subject.php"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject_id: subjectId, decision, reason })
+    });
+    setNotice(res.message || "");
+    if (res.status) loadAll();
   };
 
   useEffect(() => {
@@ -98,6 +115,43 @@ export default function HODSubjectApprovals() {
         <p>Loading...</p>
       ) : (
         <>
+          <div className="card p-4 shadow mb-4">
+            <h5>Pending Subjects</h5>
+            <div className="table-responsive">
+              <table className="table table-sm table-striped">
+                <thead>
+                  <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Year</th>
+                    <th>Semester</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingSubjects.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.subject_code}</td>
+                      <td>{s.subject_name}</td>
+                      <td>{s.year}</td>
+                      <td>{s.semester}</td>
+                      <td>
+                        <button className="btn btn-sm btn-success me-2" onClick={() => decideSubject(s.id, "approved")}>Approve</button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => decideSubject(s.id, "rejected")}>Reject</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {pendingSubjects.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center text-muted">
+                        No pending subjects.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
           <div className="card p-4 shadow mb-4">
             <h5>Class Subject Plans</h5>
             <div className="table-responsive">

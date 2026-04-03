@@ -104,7 +104,7 @@ export default function TeacherTimeTable(){
           </div>
 
           {!hasEntries && (
-            <p className="text-muted">No approved timetable entries yet.</p>
+            <p className="text-muted">No timetable entries yet.</p>
           )}
         </>
       )}

@@ -108,9 +108,10 @@ export const fetchJSON = async (url, options = {}) => {
 // Wrapper for common API call patterns.
 export const apiCall = async (url, options = {}) => {
   try {
-    const data = await fetchJSON(url, options);
+    const { suppressStatusWarning = false, ...fetchOptions } = options || {};
+    const data = await fetchJSON(url, fetchOptions);
     
-    if (!data.status) {
+    if (!data.status && !suppressStatusWarning) {
       console.warn('API returned status: false', data.message || data);
     }
     

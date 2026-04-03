@@ -98,7 +98,7 @@ export default function SubjectControllerLayout() {
             </div>
             {submenu.subject && (
               <div className="submenu">
-                <Link to="/subject-controller" className={`submenu-item ${isActive("/subject-controller") ? "active" : ""}`}>
+                <Link to="/subject-controller/planning" className={`submenu-item ${isActive("/subject-controller/planning") ? "active" : ""}`}>
                   📋 Plan & Approval
                 </Link>
               </div>

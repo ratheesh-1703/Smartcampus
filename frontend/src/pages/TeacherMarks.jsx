@@ -17,9 +17,18 @@ export default function TeacherMarks(){
     }
   }, [isAuthorized]);
 
+  const createApiUrl = (path) => {
+    const raw = buildUrl(path);
+    if (/^https?:\/\//i.test(raw)) {
+      return new URL(raw);
+    }
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    return new URL(raw, base);
+  };
+
   const searchStudents = async ()=>{
     try{
-      const url = new URL(buildUrl("get_students_advanced.php"));
+      const url = createApiUrl("get_students_advanced.php");
       if(search) url.searchParams.set("search", search);
       const data = await apiCall(url.toString());
       if(data.status) setStudents(data.students || []);

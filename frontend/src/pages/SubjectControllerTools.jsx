@@ -66,19 +66,30 @@ export default function SubjectControllerTools() {
     [plans]
   );
 
+
   const approvedAssignments = useMemo(
     () => assignments.filter((assignment) => assignment.status === "approved"),
     [assignments]
   );
 
-  const timetableAssignments = useMemo(() => {
-    if (!timetableForm.planId) return [];
-    return approvedAssignments.filter(
-      (assignment) => String(assignment.plan_id) === String(timetableForm.planId)
-    );
-  }, [approvedAssignments, timetableForm.planId]);
-
   const selectedClass = classOptions.find((c) => c.key === timetableForm.classKey);
+  const selectedTimetablePlan = plans.find((plan) => String(plan.id) === String(timetableForm.planId));
+
+  const timetableAssignments = useMemo(() => {
+    if (!selectedTimetablePlan || !selectedClass) return [];
+
+    return approvedAssignments.filter((assignment) => {
+      const assignmentClassId = assignment.class_id != null ? String(assignment.class_id) : "";
+      const assignmentSubjectId = assignment.subject_id != null ? String(assignment.subject_id) : "";
+
+      return (
+        assignmentClassId === String(selectedTimetablePlan.class_id || "") &&
+        assignmentSubjectId === String(selectedTimetablePlan.subject_id || "") &&
+        String(assignment.year) === String(selectedClass.year) &&
+        String(assignment.section) === String(selectedClass.section)
+      );
+    });
+  }, [approvedAssignments, selectedTimetablePlan, selectedClass]);
 
   const loadDept = async () => {
     if (!teacherId) return "";
@@ -147,13 +158,13 @@ export default function SubjectControllerTools() {
 
   const handleSubjectCreate = async () => {
     setNotice("");
+
     const payload = {
-      dept,
-      year: newSubject.year,
-      semester: newSubject.semester || null,
+      department: dept,
+      year: Number(newSubject.year),
+      semester: Number(newSubject.semester),
       subject_code: newSubject.subject_code,
-      subject_name: newSubject.subject_name,
-      credits: newSubject.credits
+      subject_name: newSubject.subject_name
     };
 
     const res = await apiCall(buildUrl("create_subject.php"), {
@@ -236,6 +247,11 @@ export default function SubjectControllerTools() {
 
     if (!timetableForm.planId || !timetableForm.teacherId) {
       setNotice("Select an approved plan and staff assignment.");
+      return;
+    }
+
+    if (!selectedTimetablePlan) {
+      setNotice("Select a valid approved plan.");
       return;
     }
 
@@ -618,6 +634,11 @@ export default function SubjectControllerTools() {
                 </option>
               ))}
             </select>
+            {timetableForm.planId && selectedTimetablePlan && timetableAssignments.length === 0 && (
+              <div className="text-muted small mt-1">
+                No approved staff match this class and subject plan yet.
+              </div>
+            )}
           </div>
         </div>
         <button className="btn btn-primary mt-3" onClick={handleTimetable}>

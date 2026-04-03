@@ -168,6 +168,7 @@ export default function StudentAttendance(){
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        student_id: student_id,
         session_id: sessionId,
         qr_token: qrToken
       })

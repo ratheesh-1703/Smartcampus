@@ -159,6 +159,14 @@ export default function HODDashboard() {
               <span className="d-none d-sm-inline">Attendance & Teaching</span>
               <span className="d-sm-none">Attendance</span>
             </Link>
+            <Link
+              to="/hod/subject-approvals"
+              className="list-group-item list-group-item-action border-0 px-0 py-2"
+            >
+              <i className="bi bi-journal-check text-secondary me-2"></i>
+              <span className="d-none d-sm-inline">Subject Approvals</span>
+              <span className="d-sm-none">Approvals</span>
+            </Link>
           </div>
         </div>
       </div>

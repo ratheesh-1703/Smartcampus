@@ -39,17 +39,26 @@ export default function TeacherStudents() {
     loadCourses();
   }, [teacher_id]);
 
+  const createApiUrl = (path) => {
+    const raw = buildUrl(path);
+    if (/^https?:\/\//i.test(raw)) {
+      return new URL(raw);
+    }
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    return new URL(raw, base);
+  };
+
   const loadStudents = async (dept, year, section, qsearch = "") => {
     try {
       if (qsearch) {
-        const url = new URL(buildUrl("get_students_advanced.php"));
+        const url = createApiUrl("get_students_advanced.php");
         if (qsearch) url.searchParams.set("search", qsearch);
         if (dept) url.searchParams.set("dept", dept);
         if (year) url.searchParams.set("year", year);
         const data = await apiCall(url.toString());
         if (data.status) setStudents(data.students || []);
       } else {
-        const url = new URL(buildUrl("get_students.php"));
+        const url = createApiUrl("get_students.php");
         if (dept) url.searchParams.set("department", dept);
         if (year) url.searchParams.set("year", year);
         if (section) url.searchParams.set("section", section);

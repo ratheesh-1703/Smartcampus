@@ -29,6 +29,10 @@ $whereSql = count($where) ? ('WHERE ' . implode(' AND ', $where)) : '';
 $q = mysqli_query($conn, "
   SELECT
     a.id,
+        a.class_id,
+        a.subject_id,
+        a.teacher_id,
+        a.status,
     c.year,
     c.section,
     s.subject_code,

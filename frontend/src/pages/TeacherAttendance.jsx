@@ -22,7 +22,7 @@ export default function TeacherAttendance(){
   // Login session check
   const savedUser = localStorage.getItem("user");
   const user = savedUser ? JSON.parse(savedUser) : null;
-  const isAuthorized = !!user && (user.role === "teacher" || user.role === "hod");
+  const isAuthorized = !!user && (user.role === "teacher" || user.role === "hod" || user.role === "subject_controller");
 
   const teacher_id =
     user?.teacher_id ||
@@ -88,7 +88,8 @@ export default function TeacherAttendance(){
 
     try {
       const data = await apiCall(
-        buildUrl(`get_active_teacher_session.php?teacher_id=${teacher_id}`)
+        buildUrl(`get_active_teacher_session.php?teacher_id=${teacher_id}`),
+        { suppressStatusWarning: true }
       );
 
       if(data.status){
