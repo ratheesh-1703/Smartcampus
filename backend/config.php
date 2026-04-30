@@ -33,9 +33,13 @@ mysqli_set_charset($conn, "utf8mb4");
 require_once __DIR__ . '/lib/SecurityHelper.php';
 require_once __DIR__ . '/lib/DBHelper.php';
 require_once __DIR__ . '/lib/InputValidator.php';
+require_once __DIR__ . '/lib/MailHelper.php';
 
 // Initialize database helper
 $db = new DBHelper($conn);
+
+// Initialize mail helper
+$mail = new MailHelper();
 
 // Set security headers for production
 header("Content-Type: application/json");

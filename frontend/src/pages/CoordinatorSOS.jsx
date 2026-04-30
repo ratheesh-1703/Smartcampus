@@ -6,7 +6,8 @@ export default function CoordinatorSOS() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [soundReady, setSoundReady] = useState(false);
-  const maxSeenIdRef = useRef(0);
+  const seenAlertKeysRef = useRef(new Set());
+  const initializedRef = useRef(false);
   const audioContextRef = useRef(null);
 
   const ensureAudioContext = () => {
@@ -33,10 +34,15 @@ export default function CoordinatorSOS() {
     }
   };
 
-  const playAlertSound = () => {
+  const playAlertSound = async () => {
     try {
       const context = ensureAudioContext();
-      if (!context || context.state !== "running") return;
+      if (!context) return;
+      if (context.state === "suspended") {
+        await context.resume();
+      }
+      if (context.state !== "running") return;
+      setSoundReady(true);
 
       const oscillator = context.createOscillator();
       const gainNode = context.createGain();
@@ -69,18 +75,17 @@ export default function CoordinatorSOS() {
     }
 
     const incoming = Array.isArray(data.alerts) ? data.alerts : [];
-    const incomingMaxId = incoming.reduce((max, item) => {
-      const id = Number(item.id) || 0;
-      return id > max ? id : max;
-    }, 0);
+    const incomingKeys = incoming.map((item) => `${item.id ?? ""}|${item.created_at ?? ""}`);
 
-    if (maxSeenIdRef.current > 0 && incomingMaxId > maxSeenIdRef.current) {
-      playAlertSound();
+    if (initializedRef.current) {
+      const hasNewAlert = incomingKeys.some((key) => !seenAlertKeysRef.current.has(key));
+      if (hasNewAlert) {
+        playAlertSound();
+      }
     }
 
-    if (incomingMaxId > maxSeenIdRef.current) {
-      maxSeenIdRef.current = incomingMaxId;
-    }
+    seenAlertKeysRef.current = new Set(incomingKeys);
+    initializedRef.current = true;
 
     setAlerts(incoming);
     setLoading(false);

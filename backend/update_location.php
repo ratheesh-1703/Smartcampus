@@ -60,10 +60,30 @@ try {
     $old_status = $getStatus((float)$prev["latitude"], (float)$prev["longitude"]);
   }
 
-  mysqli_query($conn, "
-    INSERT INTO live_locations(student_id, latitude, longitude, recorded_at)
-    VALUES('$student_id', '$lat', '$lng', NOW())
+  // Keep one latest location row per student (update if exists, insert if first time)
+  $latestRowRes = mysqli_query($conn, "
+    SELECT id
+    FROM live_locations
+    WHERE student_id = '$student_id'
+    ORDER BY recorded_at DESC, id DESC
+    LIMIT 1
   ");
+
+  if ($latestRowRes && mysqli_num_rows($latestRowRes) > 0) {
+    $latestRow = mysqli_fetch_assoc($latestRowRes);
+    $latestId = (int)$latestRow['id'];
+
+    mysqli_query($conn, "
+      UPDATE live_locations
+      SET latitude = '$lat', longitude = '$lng', recorded_at = NOW()
+      WHERE id = '$latestId'
+    ");
+  } else {
+    mysqli_query($conn, "
+      INSERT INTO live_locations(student_id, latitude, longitude, recorded_at)
+      VALUES('$student_id', '$lat', '$lng', NOW())
+    ");
+  }
 
   if ($old_status !== $current_status) {
     $studentRes = mysqli_query($conn, "

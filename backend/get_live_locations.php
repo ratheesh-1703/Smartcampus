@@ -30,6 +30,11 @@ $query = "
     l.longitude,
     l.recorded_at
   FROM live_locations l
+  JOIN (
+    SELECT student_id, MAX(id) AS max_id
+    FROM live_locations
+    GROUP BY student_id
+  ) latest ON latest.student_id = l.student_id AND latest.max_id = l.id
   JOIN students s ON s.id = l.student_id
 ";
 

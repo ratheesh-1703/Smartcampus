@@ -19,6 +19,11 @@ L.Icon.Default.mergeOptions({
 export default function CampusMap() {
 
   const [students, setStudents] = useState([]);
+  const CAMPUS_CENTER = [9.574837442206364, 77.67986197976006];
+
+  const uniqueStudents = Array.from(
+    new Map(students.map((student) => [student.reg_no, student])).values()
+  );
 
   /* ===== FETCH LIVE STUDENT LOCATIONS ===== */
   const loadLocations = async () => {
@@ -29,7 +34,8 @@ export default function CampusMap() {
       const data = await res.json();
 
       if (data.status) {
-        setStudents(data.students);
+        const incoming = Array.isArray(data.students) ? data.students : [];
+        setStudents(incoming);
       }
     } catch (err) {
       console.error("Location fetch error:", err);
@@ -45,7 +51,7 @@ export default function CampusMap() {
 
   return (
     <MapContainer
-      center={[9.9179, 77.7460]}   // Kalasalingam University
+      center={CAMPUS_CENTER}
       zoom={17}
       style={{ height: "100vh", width: "100%" }}
     >
@@ -56,7 +62,7 @@ export default function CampusMap() {
       />
 
       {/* ===== UNIVERSITY FIXED MARKER ===== */}
-      <Marker position={[9.9179, 77.7460]}>
+      <Marker position={CAMPUS_CENTER}>
         <Popup>
           <b>Kalasalingam University</b><br />
           Krishnankoil, Tamil Nadu
@@ -64,9 +70,9 @@ export default function CampusMap() {
       </Marker>
 
       {/* ===== LIVE STUDENT MARKERS ===== */}
-      {students.map((s, index) => (
+      {uniqueStudents.map((s) => (
         <Marker
-          key={index}
+          key={s.reg_no}
           position={[s.latitude, s.longitude]}
         >
           <Popup>

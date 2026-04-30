@@ -45,6 +45,7 @@ AND s.id NOT IN (
 ");
 
 // ================= SEND EMAIL ALERT =================
+$email_results = [];
 while($a = mysqli_fetch_assoc($absent)){
 
   if(!$a["parent_email"]) continue;
@@ -67,15 +68,15 @@ while($a = mysqli_fetch_assoc($absent)){
   Smart Campus System
   ";
 
-  $headers  = "MIME-Version: 1.0\r\n";
-  $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-  $headers .= "From: Smart Campus <no-reply@smartcampus.com>";
-
-  mail($to, $subject, $msg, $headers);
+  // Send email using MailHelper with logging
+  $result = $mail->send($to, $subject, $msg, [], true);
+  $email_results[] = $result;
 }
 
 echo json_encode([
   "status"=>true,
-  "message"=>"Attendance Ended & Parent Alerts Sent"
+  "message"=>"Attendance Ended & Parent Alerts Sent",
+  "email_results" => $email_results,
+  "emails_sent" => count(array_filter($email_results, fn($r) => $r['success']))
 ]);
 ?>

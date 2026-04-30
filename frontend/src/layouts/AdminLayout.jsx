@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./DashboardLayout.css";
+import useGlobalSosNotifier from "../hooks/useGlobalSosNotifier";
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false);
@@ -9,6 +10,8 @@ export default function AdminLayout() {
   const user = JSON.parse(localStorage.getItem("user"));
   const location = useLocation();
   const navigate = useNavigate();
+
+  useGlobalSosNotifier(location.pathname);
 
   const toggleSubmenu = (key) => {
     setSubmenu(prev => ({ ...prev, [key]: !prev[key] }));
